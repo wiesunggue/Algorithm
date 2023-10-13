@@ -1,0 +1,73 @@
+# https://www.acmicpc.net/problem/2042
+# 구간합 구하기
+# 세그먼트 트리 기본 문제
+
+import sys
+rinput = sys.stdin.readline
+rprint = sys.stdout.write
+INT_MAX=10**9
+class Segment_Tree():
+    def __init__(self,N):
+        self.array = [0]*4*N
+        self.N = N
+
+    def get_left(self,node):
+        return 2*node
+    def get_right(self,node):
+        return 2*node+1
+    def get_parent(self,node):
+        return node//2
+
+    def make_tree(self,arr,left,right,node):
+        if left==right:
+            self.array[node]=arr[left]
+            return self.array[node]
+
+        mid = (left+right)//2
+        left_tree=self.make_tree(arr,left,mid,self.get_left(node))
+        right_tree=self.make_tree(arr,mid+1,right,self.get_right(node))
+
+        self.array[node]=left_tree+right_tree
+
+        return self.array[node]
+
+    def inner_query(self,left,right,node,nodeleft,noderight):
+        if right<nodeleft or noderight<left:
+            return 0
+
+        if left<=nodeleft and noderight <=right:
+            return self.array[node]
+
+        mid = (nodeleft+noderight)//2
+        return self.inner_query(left,right,node*2,nodeleft,mid)+self.inner_query(left,right,node*2+1,mid+1,noderight)
+
+    def query(self,left, right):
+        return self.inner_query(left,right,1,0,self.N-1)
+
+    def inner_update(self,index,newValue,node, nodeleft, noderight):
+        if index < nodeleft or noderight <index:
+            return self.array[node]
+
+        if nodeleft==noderight:
+            self.array[node]=newValue
+            return self.array[node]
+
+        mid = (nodeleft+noderight)//2
+        self.array[node]=self.inner_update(index, newValue,node*2,nodeleft,mid)+self.inner_update(index,newValue,node*2+1,mid+1,noderight)
+        return self.array[node]
+    def update(self,index, newValue):
+        return self.inner_update(index, newValue, 1, 0, self.N-1)
+
+def solve():
+    N,M,K = map(int,input().split())
+    arr = [int(rinput()) for _ in range(N)]
+    Segsum = Segment_Tree(N)
+    Segsum.make_tree(arr,0,N-1,1)
+    ans = [list(map(int,rinput().split())) for _ in range(M+K)]
+    for i in ans:
+        if i[0]==1:
+            Segsum.update(i[1]-1,i[2])
+        else:
+            rprint("{}\n".format(Segsum.query(i[1]-1,i[2]-1)))
+if __name__ =='__main__':
+    solve()
