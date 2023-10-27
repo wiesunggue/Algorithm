@@ -17,6 +17,7 @@ def solution():
     cnt_dict = Counter()
     for num, s in data:
         cnt_dict.update(Counter(list(s)))
+        cnt_dict[s[0]]+=10
         support_dict[s[0]]=1
         if num=='-1':
             for i in list(s):
