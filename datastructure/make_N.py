@@ -1,3 +1,6 @@
+# https://www.acmicpc.net/problem/17255
+# 백준 17255번 N으로 만들기
+
 from collections import deque,defaultdict
 
 N = input()
