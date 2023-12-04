@@ -5,6 +5,56 @@
 # equality form은 AX=B, X>=0 minimize F(X)로 이루어짐
 # AX <= B와 CX = D의 꼴이 있다면 A'X'=B의 꼴로 제약식을 변경해야 함
 import time
+import numpy as np
+def swap_rows(matrix, i, j):
+    matrix[i], matrix[j] = matrix[j].copy(), matrix[i].copy()
+
+
+def inv(matrix):
+    n = len(matrix)
+
+    # 단위 행렬 생성
+    identity = [[1.0 if i == j else 0.0 for j in range(n)] for i in range(n)]
+
+    # 기존 행렬과 단위 행렬을 합침
+    augmented_matrix = [row + identity_row for row, identity_row in zip(matrix, identity)]
+
+    # 가우스-조던 소거법 수행
+    for i in range(n):
+        # 피벗이 0이 되지 않도록 조정
+        if augmented_matrix[i][i] == 0.0:
+            # 피벗이 0이면 행을 바꿔줌
+            for k in range(i + 1, n):
+                if augmented_matrix[k][i] != 0.0:
+                    swap_rows(augmented_matrix, i, k)
+                    break
+            else:
+                raise ValueError("Matrix is singular and doesn't have an inverse.")
+
+        pivot = augmented_matrix[i][i]
+        # 피벗을 1로 만듦
+        for j in range(n * 2):
+            augmented_matrix[i][j] /= pivot
+        # 다른 행들을 0으로 만듦
+        for k in range(n):
+            if k != i:
+                factor = augmented_matrix[k][i]
+                for j in range(n * 2):
+                    augmented_matrix[k][j] -= factor * augmented_matrix[i][j]
+
+    # 역행렬 추출
+    inverse_matrix = [row[n:] for row in augmented_matrix]
+
+    return inverse_matrix
+
+def inv(mat):
+    np_mat = np.array(mat)
+    inv_mat = np.linalg.inv(np_mat)
+    ans = []
+    for i in range(len(inv_mat)):
+        ans.append(list(inv_mat[i]))
+
+    return ans
 def inverse_vector(A):
     '''벡터에 -를 곱한 값을 반환하기'''
     arr = A
@@ -25,36 +75,6 @@ def add_rows(row1, row2):
     """Add corresponding elements of two rows."""
     return [element1 + element2 for element1, element2 in zip(row1, row2)]
 
-
-def gauss_jordan(matrix):
-    """Apply Gauss-Jordan elimination to the given matrix."""
-    num_rows = len(matrix)
-    num_columns = len(matrix[0])
-
-    for i in range(num_rows):
-        # Make the diagonal element 1
-        diagonal_element = matrix[i][i]
-        matrix[i] = multiply_row(matrix[i], 1 / diagonal_element)
-
-        # Eliminate non-diagonal elements
-        for j in range(num_rows):
-            if i != j:
-                factor = matrix[j][i]
-                matrix[j] = add_rows(matrix[j], multiply_row(matrix[i], -factor))
-
-
-def inverse_mat(matrix):
-    """Find the inverse of the given matrix using Gauss-Jordan elimination."""
-    num_rows = len(matrix)
-    augmented_matrix = [row + identity_matrix(num_rows)[row_num] for row_num, row in enumerate(matrix)]
-
-    gauss_jordan(augmented_matrix)
-
-    # Extract the inverse matrix from the augmented matrix
-    inv_matrix = [row[num_rows:] for row in augmented_matrix]
-
-    return inv_matrix
-
 def matmul(A,B):
     '''행렬곱 A*B를 계산하여 반환하기'''
     matR = [len(B[0]) * [0] for i in range(len(A))]
@@ -71,6 +91,8 @@ def determinant(A):
     pass
 
 def transpose(A):
+    if len(A)==0:
+        return []
     M = len(A)
     N = len(A[0])
     new_mat = [[0]*M for i in range(N)]
@@ -120,11 +142,14 @@ def find_leaving_index(X_b,A_b,A_q):
     # case 1 2-5x=0
     # case 2 -2+5x=0
     # 두가지 경우에 다 잘 동작해야 한다.
-    temp = matmul(inverse_mat(A_b),A_q)
+    temp = matmul(inv(A_b),A_q)
 
     ans_set = []
     for i in range(len(X_b)):
-        ans_set.append(X_b[i][0]/temp[i][0])
+        if temp[i][0] > 1e-10:
+            ans_set.append(X_b[i][0]/temp[i][0])
+        else:
+            ans_set.append(0)
     ans = 10**20
     idx = -1
     for i in range(len(X_b)):
@@ -155,13 +180,13 @@ def simplex_find_initial(goal,equations):
         aux_basis = sorted(aux_basis)
         trans_A = transpose(aux_A)
         A_b = transpose([trans_A[i] for i in aux_basis])
-        X_b = matmul(inverse_mat(A_b), aux_B)
+        X_b = matmul(inv(A_b), aux_B)
         C_b = [[aux_goal[i]] for i in aux_basis]
         A_v = transpose([trans_A[i] for i in aux_V])
         C_v = [[aux_goal[i]] for i in aux_V]
 
         # lamda 구하기
-        lamda = matmul(inverse_mat(transpose(A_b)), C_b)
+        lamda = matmul(inv(transpose(A_b)), C_b)
         print('lamda',lamda,C_b,aux_goal,'X_b',X_b,A_b)
         temp = matmul(transpose(A_v), lamda)
         mu_v = [0] * (len(C_v))
@@ -203,24 +228,29 @@ def Simplex(goal,equations):
         Basis의 원소를 하나씩 교체해가면서 최적의 Basis를 찾는다'''
     A,X,B = equations
     basis = set(simplex_find_initial(goal,equations))
-    #basis = set([1,2])
+    #basis = set([0,1,2])
     B = [[i] for i in B]
     total_set = set(list(range(len(A[0]))))
+    counter =0
     while True:
-        print('basis',basis)
+        counter += 1
         # find X_b
         V = total_set.difference(basis)
+        print(f'{counter}th basis',basis,'V',V)
+
         V = sorted(V)
         basis = sorted(basis)
         trans_A = transpose(A)
         A_b = transpose([trans_A[i] for i in basis])
-        X_b = matmul(inverse_mat(A_b),B)
+        print("A_b",inv(A_b))
+        X_b = matmul(inv(A_b),B)
+        print("X_b",X_b)
         C_b = [[goal[i]] for i in basis]
         A_v = transpose([trans_A[i]for i in V])
         C_v = [[goal[i]] for i in V]
 
         # lamda 구하기
-        lamda = matmul(inverse_mat(A_b),C_b)
+        lamda = matmul(inv(transpose(A_b)),C_b)
         temp = matmul(transpose(A_v), lamda)
         mu_v = [0] * (len(C_v))
         for i in range(len(C_v)):
@@ -249,7 +279,6 @@ def Simplex(goal,equations):
         basis = set(basis)
         basis.discard(leaving_idx)
         basis.add(entering_idx)
-        print('basis',basis)
     ans_X = [0] * len(goal)
     for i in range(len(basis)):
         ans_X[basis[i]] = X_b[i][0]
@@ -260,9 +289,9 @@ def Simplex(goal,equations):
     return sol
 
 
-goal = [1,2,3]
-A = [[5,-1,1],[5,1,-3]]
-B = [1,-2]
+goal = [1,1,1,1]
+A = [[1,0,1,0],[0,1,0,1]]
+B = [1,5]
 print(Simplex(goal,(A,[],B)))
 
 '''
@@ -276,3 +305,5 @@ A = [[2,-1,2],[5,1,-6]]
 B = [1,-2]
 print(Simplex(goal,(A,[],B)))
 '''
+
+#print(np.linalg.inv(np.array(A)))
