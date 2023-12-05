@@ -1,3 +1,5 @@
+# https://www.acmicpc.net/problem/1281
+
 # simplex 구현 알고리즘
 # 수리적인 이론만 보고 구현해서 비효율적일 가능성이 있음
 
@@ -47,14 +49,6 @@ def inv(matrix):
 
     return inverse_matrix
 
-def inv(mat):
-    np_mat = np.array(mat)
-    inv_mat = np.linalg.inv(np_mat)
-    ans = []
-    for i in range(len(inv_mat)):
-        ans.append(list(inv_mat[i]))
-
-    return ans
 def inverse_vector(A):
     '''벡터에 -를 곱한 값을 반환하기'''
     arr = A
@@ -75,6 +69,9 @@ def add_rows(row1, row2):
     """Add corresponding elements of two rows."""
     return [element1 + element2 for element1, element2 in zip(row1, row2)]
 
+
+
+
 def matmul(A,B):
     '''행렬곱 A*B를 계산하여 반환하기'''
     matR = [len(B[0]) * [0] for i in range(len(A))]
@@ -86,13 +83,7 @@ def matmul(A,B):
 
     return matR
 
-def determinant(A):
-    '''행렬식을 계산해서 반환하기(가우스 소거법이용하자)'''
-    pass
-
 def transpose(A):
-    if len(A)==0:
-        return []
     M = len(A)
     N = len(A[0])
     new_mat = [[0]*M for i in range(N)]
@@ -220,6 +211,7 @@ def simplex_find_initial(goal,equations):
         #time.sleep(1)
     print('final aux_baiss',aux_basis)
     return aux_basis
+
 def Simplex(goal,equations):
     '''simplex의 전략
     1. Initialization Phase
@@ -288,22 +280,32 @@ def Simplex(goal,equations):
         sol += goal[i]*ans_X[i]
     return sol
 
+#N,M = map(int,input().split())
+#arr = [list(map(int,input().split())) for i in range(N)]
+arr = [[2,1,2],[3,1,1]]
+import numpy as np
 
-goal = [1,1,1,1]
-A = [[1,0,1,0],[0,1,0,1]]
-B = [1,5]
-print(Simplex(goal,(A,[],B)))
-
-'''
-# test case 2
-# 2x-y+2z = 1
-# 5x+y-3z = -2
-# x,y,z>=0
-# TODO 의미있는 제약식만 찾도록 하는 함수 만들어야 함
-goal = [1,2,3]
-A = [[2,-1,2],[5,1,-6]]
-B = [1,-2]
-print(Simplex(goal,(A,[],B)))
-'''
-
-#print(np.linalg.inv(np.array(A)))
+def tester(n,m):
+    N,M = 10,10
+    goal = [1] * (N+M)
+    A = []
+    #B = []
+    for i in range(N):
+        for j in range(M):
+            if i!=0 and j!=0:
+                break
+            A.append([0 if i!=t else 1 for t in range(N)]+[0 if j!=k else 1 for k in range(M)])
+    A = np.array(A)
+    return np.linalg.matrix_rank(A)!=len(A)
+N=256
+M=256
+cnt=0
+for i in range(N):
+    for j in range(M):
+        cnt += tester(i,j)
+print(cnt)
+#        B.append(arr[i][j])
+# 독립인 행은 반드시 N+M-1개가 된다 -> 최대 제약식의 개수 = 511개
+#print(A,B)
+#print(Simplex(goal,(A,[],B)))
+#print(*np_mat(mat),sep='\n')
