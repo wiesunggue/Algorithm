@@ -6,6 +6,7 @@
 # 1. simplex 알고리즘은 제약이 EQUALITY FORM으로 작성되어야 함
 # equality form은 AX=B, X>=0 minimize F(X)로 이루어짐
 # AX <= B와 CX = D의 꼴이 있다면 A'X'=B의 꼴로 제약식을 변경해야 함
+# 현재 simplex 알고리즘의 문제점은 inv 연산 -> 근 찾기 과정에 의해서 해당 연산의 오버헤드가 매우 크다는 점
 import sys
 input = sys.stdin.readline
 def swap_rows(matrix, i, j):
@@ -104,12 +105,12 @@ def simplex_find_initial(goal,equations):
     aux_B = [[i] for i in B]
     aux_basis = set([len(goal)+i for i in range(len(A))])
     aux_A = [A[i]+[int(i==j)*minus(B[j]) for j in range(len(A))] for i in range(len(A))]
-    print(aux_basis)
     total_set = set(list(range(len(aux_A[0]))))
     counter = 0
     trans_A = transpose(aux_A)
     while True:
         counter +=1
+        print(f'initial iteration {counter}th')
         # find X_b
         aux_V = total_set.difference(aux_basis)
         aux_V = sorted(aux_V)
@@ -119,7 +120,6 @@ def simplex_find_initial(goal,equations):
         C_b = [[aux_goal[i]] for i in aux_basis]
         A_v = transpose([trans_A[i] for i in aux_V])
         C_v = [[aux_goal[i]] for i in aux_V]
-
         # lamda 구하기
         lamda = matmul(inv(transpose(A_b)), C_b)
         temp = matmul(transpose(A_v), lamda)
@@ -161,10 +161,14 @@ def Simplex(goal,equations):
     print('initial basis',basis)
     B = [[i] for i in B]
     total_set = set(list(range(len(A[0]))))
+    if basis.difference(total_set): # 빈 집합이 아니면 초기값 탐색이 실패
+        basis = set(list(range(len(basis))))
     counter =0
     trans_A = transpose(A)
     while True:
+
         counter += 1
+        print(f'iteration {counter}th')
         # find X_b
         V = total_set.difference(basis)
         V = sorted(V)
@@ -205,6 +209,15 @@ def Simplex(goal,equations):
         basis = set(basis)
         basis.discard(leaving_idx)
         basis.add(entering_idx)
+
+        # 테스트 코드
+        ans_X = [0] * len(goal)
+        for i in range(len(basis)):
+            ans_X[basis[i]] = X_b[i][0]
+        sol = 0
+        for i in range(len(goal)):
+            sol += goal[i] * ans_X[i]
+        print(f'{counter}th solution',sol)
     ans_X = [0] * len(goal)
     for i in range(len(basis)):
         ans_X[basis[i]] = X_b[i][0]
@@ -215,10 +228,9 @@ def Simplex(goal,equations):
 
 #N,M = map(int,input().split())
 #arr = [list(map(int,input().split())) for i in range(N)]
-N,M = 10,10
+N,M = 100,100
 import random,time
 arr = [[random.randint(1,20000) for i in range(M)] for j in range(N)]
-#print(arr)
 goal = [1] * (N+M)
 A = []
 B = []
@@ -228,7 +240,6 @@ for i in range(N):
             break
         A.append([0 if i!=t else 1 for t in range(N)]+[0 if j!=k else 1 for k in range(M)])
         B.append(arr[i][j])
-print("A",len(A))
 # 독립인 행은 반드시 N+M-1개가 된다 -> 최대 제약식의 개수 = 511개
 s = time.time()
 print(int(Simplex(goal,(A,[],B))+0.5))
