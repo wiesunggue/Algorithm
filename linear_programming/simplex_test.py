@@ -278,7 +278,7 @@ def Simplex(goal,equations):
     for i in range(len(basis)):
         ans_X[basis[i]] = X_b[i][0]
     sol = 0
-    #print(ans_X,X_b)
+    print(ans_X,X_b,basis)
     for i in range(len(goal)):
         sol += goal[i]*ans_X[i]
     return sol
@@ -324,7 +324,13 @@ for i in range(N):
             break
         A.append([0 if i!=t else 1 for t in range(N)]+[0 if j!=k else 1 for k in range(M)])
         B.append(arr[i][j])
-B = [15,2,3,4,6]
+B = [100,200,300,400]
+A = [[1,0,1,0,0,0],
+     [1,0,0,1,0,0],
+     [1,0,0,0,1,0],
+     [1,0,0,0,0,1],
+     ]
+goal = [100,0,0,0,0,0]
 print(A,B)
 import numpy as np
 print(np.linalg.matrix_rank(np.array(A)), len(A))

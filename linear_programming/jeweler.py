@@ -226,11 +226,8 @@ def Simplex(goal,equations):
         sol += goal[i]*ans_X[i]
     return sol
 
-#N,M = map(int,input().split())
-#arr = [list(map(int,input().split())) for i in range(N)]
-N,M = 100,100
-import random,time
-arr = [[random.randint(1,20000) for i in range(M)] for j in range(N)]
+N,M = map(int,input().split())
+arr = [list(map(int,input().split())) for i in range(N)]
 goal = [1] * (N+M)
 A = []
 B = []
@@ -241,7 +238,4 @@ for i in range(N):
         A.append([0 if i!=t else 1 for t in range(N)]+[0 if j!=k else 1 for k in range(M)])
         B.append(arr[i][j])
 # 독립인 행은 반드시 N+M-1개가 된다 -> 최대 제약식의 개수 = 511개
-s = time.time()
 print(int(Simplex(goal,(A,[],B))+0.5))
-e = time.time()
-print('실행시간: ',e-s)
