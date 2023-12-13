@@ -86,10 +86,6 @@ def matmul(A,B):
 
     return matR
 
-def determinant(A):
-    '''행렬식을 계산해서 반환하기(가우스 소거법이용하자)'''
-    pass
-
 def transpose(A):
     if len(A)==0:
         return []

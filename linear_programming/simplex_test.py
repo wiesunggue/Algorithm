@@ -12,8 +12,8 @@ import random
 def swap_rows(matrix, i, j):
     matrix[i], matrix[j] = matrix[j].copy(), matrix[i].copy()
 
-
 def inv(matrix):
+    '''역행렬 게산하는 함수 입력을 이중 List로 받고, 이중 list로 반환한다'''
     n = len(matrix)
 
     # 단위 행렬 생성
@@ -49,53 +49,34 @@ def inv(matrix):
     inverse_matrix = [row[n:] for row in augmented_matrix]
 
     return inverse_matrix
-
-def inverse_vector(A):
-    '''벡터에 -를 곱한 값을 반환하기'''
-    arr = A
-    for i in range(len(A)):
-        arr[i] = -A[i]
-
 def identity_matrix(size):
     """Create an identity matrix of given size."""
     return [[1 if i == j else 0 for j in range(size)] for i in range(size)]
 
-
-def multiply_row(row, scalar):
-    """Multiply each element of a row by a scalar."""
-    return [element * scalar for element in row]
-
-
-def add_rows(row1, row2):
-    """Add corresponding elements of two rows."""
-    return [element1 + element2 for element1, element2 in zip(row1, row2)]
-
-
-
-
-def matmul(A,B):
-    '''행렬곱 A*B를 계산하여 반환하기'''
-    matR = [len(B[0]) * [0] for i in range(len(A))]
+def matmul(mat1,mat2):
+    '''행렬곱 mat1*mat2를 계산하여 반환하는 함수, 행렬은 이중 리스트로 구현됨'''
+    matR = [len(mat2[0]) * [0] for i in range(len(mat1))]
 
     for i in range(len(matR)):
         for j in range(len(matR[i])):
-            for k in range(len(A[i])):
-                matR[i][j] += A[i][k] * B[k][j]
+            for k in range(len(mat1[i])):
+                matR[i][j] += mat1[i][k] * mat2[k][j]
 
     return matR
 
-def transpose(A):
-    M = len(A)
-    N = len(A[0])
+def transpose(matrix):
+    """행렬을 입력받아 입력받은 행렬의 전치 행렬을 반환하는 함수, 입력은 이중 리스트이다"""
+    M = len(matrix)
+    N = len(matrix[0])
     new_mat = [[0]*M for i in range(N)]
     for i in range(N):
         for j in range(M):
-            new_mat[i][j] = A[j][i]
+            new_mat[i][j] = matrix[j][i]
     return new_mat
 
 def convert_constraint(ineq,eq,goal):
     '''1. simplex 알고리즘은 제약이 EQUALITY FORM으로 작성되어야 함
-    즉, AX <= B와 CX = D의 꼴이 있다면 A'X'=B의 꼴로 제약식을 변경해야 함'''
+    즉, AX <= B와 CX = D의 꼴이 있다면 A'X'=B의 꼴로 제약식을 변경해야 함 ////아직 사용하지 않음'''
 
     A,B = ineq # 튜플로 입력받은 2차원 배열(A)과 벡터(B) (AX>B는 음수를 곱해서 AX<B로 변환)
     C,D = eq
@@ -126,84 +107,93 @@ def convert_constraint(ineq,eq,goal):
 
     return goal,(new_arr,variable,new_vector) # equality form반환
 def minus(a):
+    '''리스트를 입력받아 양수는 1 음수는 -1가지도록 하는 함수'''
     return 1 if a>0 else -1
 
 def find_leaving_index(X_b,A_b,A_q):
     '''leaving index를 탐색한다.
-    반환값: leaving index, epillon'''
-    # case 1 2-5x=0
-    # case 2 -2+5x=0
-    # 두가지 경우에 다 잘 동작해야 한다.
+    #A_b^-1 * A_q * x = X_b의 해를 푼다
+    leaving index를 찾기 위해서 각 방정식의 해를 구하고, 해 중 최소인 양수 해를 선택한다.
+    만약 최소가 되는 양수 해가 없다면 -1을 반환
+    Returns: leaving index, epillon'''
+    size = len(X_b) # 입력받은 방정식의 개수
     temp = matmul(inv(A_b),A_q)
 
-    ans_set = []
-    for i in range(len(X_b)):
-        if temp[i][0] > 1e-10:
-            ans_set.append(X_b[i][0]/temp[i][0])
+    ans_set = [0]*size
+    # 각 방정식의 해를 구한다.
+    for i in range(size):
+        if temp[i][0] > 1e-10: # 분모가 1e-10보다 작으면 분모가 0이라고 판단한다.
+            ans_set[i] = X_b[i][0]/temp[i][0]
         else:
-            ans_set.append(0)
-    ans = 10**20
-    idx = -1
-    for i in range(len(X_b)):
-        if ans_set[i]<ans and ans_set[i]>0:
-            ans = ans_set[i]
-            idx = i
-    #print('leaving idx',X_b,A_b,A_q,temp,idx,ans)
+            ans_set[i] = 2**64
+
+    # 양수인 해 중 가장 작은 값을 찾는다.
+    ans = min(ans_set)
+    idx = ans_set.index(ans) # 만약 모든 해가 문제가 있다면 idx = -1이 반환됨
     return idx,ans
 
 # Polytope의 꼭짓점들을 지나면서 minimizer를 찾는다
 def simplex_find_initial(goal,equations):
     '''simplex의 초기 Basis를 결정하기
         초기 Basis는 Z변수를 각 방정식에 추가하고, Z에 해당하는 부분을 Basis라고 정의한다.
-        이후 해당 값에서 Simplex 탐색을 하여 Z가 포함되지 않은 Basis를 구한다.'''
+        이후 해당 값에서 Simplex 탐색을 하고 Basis를 반환한다.'''
     A, X, B = equations
-    aux_goal = [0 for i in goal] + [1] * len(A)
+    # aux문제로 만들기 위해서 모든 방정식에 slack변수를 추가한다.
+
+    # num_of_eq: 부등식의 개수, num_of_var: 변수의 개수
+    num_of_eq, num_of_var = len(A),len(goal)
+    aux_goal = [0 for i in goal] + [1] * num_of_eq
     aux_B = [[i] for i in B]
-    aux_basis = set([len(goal)+i for i in range(len(A))])
-    aux_A = [A[i]+[int(i==j)*minus(B[j]) for j in range(len(A))] for i in range(len(A))]
-    total_set = set(list(range(len(aux_A[0]))))
+    aux_basis = set([num_of_var+i for i in range(num_of_eq)]) # 초기 기저는 추가된 변수
+    aux_A = [A[i]+[int(i==j)*minus(B[j]) for j in range(num_of_eq)] for i in range(num_of_eq)]
+
+    # 새롭게 정의된 문제 Aux문제
+    # aux_num_of_eq, aux_num_of_var
+    aux_num_of_eq, aux_num_of_var = len(aux_A), len(aux_A[0])
+    total_set = set(range(aux_num_of_var))
+    # B와 V의 개수
+    num_of_B, num_of_V = len(aux_B), aux_num_of_var-len(aux_B)
+
+    aux_trans_A = transpose(aux_A)
+
     counter = 0
     while True:
         counter +=1
-        #print('aux_basis',aux_basis)
-        # find X_b
+
+        # aux V 업데이트
         aux_V = total_set.difference(aux_basis)
         aux_V = sorted(aux_V)
         aux_basis = sorted(aux_basis)
-        trans_A = transpose(aux_A)
-        A_b = transpose([trans_A[i] for i in aux_basis])
+
+        # 연산에 필요한 기본 변수 생성하기
+        A_b = transpose([aux_trans_A[i] for i in aux_basis])
         X_b = matmul(inv(A_b), aux_B)
         C_b = [[aux_goal[i]] for i in aux_basis]
-        A_v = transpose([trans_A[i] for i in aux_V])
+        A_v = transpose([aux_trans_A[i] for i in aux_V])
         C_v = [[aux_goal[i]] for i in aux_V]
 
         # lamda 구하기
         lamda = matmul(inv(transpose(A_b)), C_b)
-        #print('lamda',lamda,C_b,aux_goal,'X_b',X_b,A_b)
         temp = matmul(transpose(A_v), lamda)
-        mu_v = [0] * (len(C_v))
-        for i in range(len(C_v)):
+        mu_v = [0] * (num_of_V)
+        for i in range(num_of_V):
             mu_v[i] = C_v[i][0] - temp[i][0]
 
         # entering index 구하기
         # dantzig's rule로 계산하자 -> mu_v중에 가장 작은 값을 기준으로 업데이트 한다.
-        idx = -1
-        temp_min = 0
-        for i in range(len(mu_v)):
-            if mu_v[i] < temp_min:
-                temp_min = mu_v[i]
-                idx = i
+        temp_min = min(mu_v)
         # mu_v의 모든 값이 양수면 최적해이므로 탐색 종료한다
-        #print('mu',mu_v)
-        if idx == -1:
+        if temp_min>=-1e-15:
             break
+        idx = mu_v.index(temp_min)
         entering_idx = aux_V[idx]
 
         # leaving index 구하기
-        A_q = [[i] for i in trans_A[entering_idx]]
+        A_q = [[i] for i in aux_trans_A[entering_idx]]
         idx, epillon = find_leaving_index(X_b, A_b, A_q)
         leaving_idx = aux_basis[idx]
         #print(f'{counter}th important info',mu_v,aux_basis,'entering',entering_idx,'leaving',leaving_idx,'c:',C_v,'temp:',temp)
+
         # basis업데이트
         aux_basis = set(aux_basis)
         aux_basis.discard(leaving_idx)
@@ -211,6 +201,8 @@ def simplex_find_initial(goal,equations):
         #print('basis',aux_basis)
         #time.sleep(1)
     #print('final aux_baiss',aux_basis)
+
+    # 해당 문제에서는 최적해를 계산할 이유가 없다.
     return aux_basis
 
 def Simplex(goal,equations):
@@ -218,28 +210,34 @@ def Simplex(goal,equations):
     1. Initialization Phase
         초기 Basis를 찾는다.
     2. Optimization Phase
-        Basis의 원소를 하나씩 교체해가면서 최적의 Basis를 찾는다'''
+        Basis의 원소를 하나씩 교체해가면서 최적의 Basis를 찾아서 이때의 최적해를 반환한다'''
     A,X,B = equations
+    num_of_eq, num_of_var = len(A),len(goal)
     basis = set(simplex_find_initial(goal,equations))
-    total_set = set(list(range(len(A[0]))))
-    #if basis.difference(total_set):
-    #    basis = set(list(range(len(basis))))
-    #basis = set([0,1,2])
+    total_set = set(list(range(num_of_eq)))
+
+    # 주의!!!!!!
+    # 심플렉스 연산 결과 basis에 aux의 변수가 basis로 들어갔다면 해당 제약식은 모순이 존재한다
+    if len(basis.difference(total_set)) == 0:
+        raise Exception("The Equation has a Contradict!")
     B = [[i] for i in B]
+    trans_A = transpose(A)
+
+    # B와 V의 개수
+    num_of_B, num_of_V = len(basis), num_of_var - len(basis)
+
     counter =0
     while True:
         counter += 1
-        # find X_b
-        V = total_set.difference(basis)
-        #print(f'{counter}th basis',basis,'V',V)
 
+        # V 업데이트
+        V = total_set.difference(basis)
         V = sorted(V)
         basis = sorted(basis)
-        trans_A = transpose(A)
+
+        # 연산에 필요한 기본 변수 생성하기
         A_b = transpose([trans_A[i] for i in basis])
-        #print("A_b",inv(A_b))
         X_b = matmul(inv(A_b),B)
-        #print("X_b",X_b)
         C_b = [[goal[i]] for i in basis]
         A_v = transpose([trans_A[i]for i in V])
         C_v = [[goal[i]] for i in V]
@@ -247,22 +245,17 @@ def Simplex(goal,equations):
         # lamda 구하기
         lamda = matmul(inv(transpose(A_b)),C_b)
         temp = matmul(transpose(A_v), lamda)
-        mu_v = [0] * (len(C_v))
-        for i in range(len(C_v)):
+        mu_v = [0] * (num_of_V)
+        for i in range(num_of_V):
             mu_v[i] = C_v[i][0] - temp[i][0]
 
         # entering index 구하기
         # dantzig's rule로 계산하자 -> mu_v중에 가장 작은 값을 기준으로 업데이트 한다.
-        idx = -1
-        temp_min = 0
-        for i in range(len(mu_v)):
-            if mu_v[i]<temp_min:
-                temp_min = mu_v[i]
-                idx = i
-        #print('mu_v entering list',idx,basis,C_v,goal,mu_v)
+        temp_min = min(mu_v)
         # mu_v의 모든 값이 양수면 최적해이므로 탐색 종료한다
-        if idx== -1:
+        if temp_min>=-1e-15:
             break
+        idx = mu_v.index(temp_min)
         entering_idx = V[idx]
 
         # leaving index 구하기
@@ -274,12 +267,16 @@ def Simplex(goal,equations):
         basis = set(basis)
         basis.discard(leaving_idx)
         basis.add(entering_idx)
-    ans_X = [0] * len(goal)
-    for i in range(len(basis)):
+
+    # 각 변수가 가지는 값을 저장하기(Basis에 대해서만 계산된 것을 0을 포함한 식으로 변환한다)
+    ans_X = [0] * num_of_var
+    for i in range(num_of_B):
         ans_X[basis[i]] = X_b[i][0]
     sol = 0
     print(ans_X,X_b,basis)
-    for i in range(len(goal)):
+
+    # 제약식을 만족하면서 최소를 이루는 해 계산하기
+    for i in range(num_of_var):
         sol += goal[i]*ans_X[i]
     return sol
 
@@ -288,6 +285,7 @@ def Simplex(goal,equations):
 arr = [[2,1,2],[3,1,1]]
 
 def tln(n,m):
+    '''테스트용 함수'''
     N,M = 10,10
     goal = [1] * (N+M)
     A = []
