@@ -15,7 +15,7 @@ while K and idx<N:
     st.append(arr[idx])
     idx += 1
 
-# 삭제가 끝났지만 남은 자료가 존재하는 경우
+# 삭제가 끝났지만 스택에 넣지 않고 남은 자료가 존재하는 경우
 while idx<N:
     st.append(arr[idx])
     idx +=1
