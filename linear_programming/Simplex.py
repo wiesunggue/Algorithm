@@ -284,12 +284,17 @@ def Simplex(goal,equations):
         sol += goal[i]*ans_X[i]
     return sol
 
-
+'''
 goal = [1,1,1,1]
 A = [[1,0,1,0],[1,0,0,1],[0,1,1,0],[0,1,0,1]]
 B = [1,2,3,4]
 print(Simplex(goal,(A,[],B)))
+'''
 
+goal = [1,1,0,0,0]
+A = [[1,1,0,0,0],[1,0,1,0,0],[1,0,0,1,0],[1,0,0,0,1]]
+B = [1,2,3,4]
+print(Simplex(goal,(A,[],B)))
 '''
 # test case 2
 # 2x-y+2z = 1
