@@ -10,3 +10,4 @@ for i in range(N):
     ans ^= arr[i]*arr[i]
 
 print(ans)
+
