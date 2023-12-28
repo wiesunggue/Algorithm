@@ -6,13 +6,17 @@ input = sys.stdin.readline
 D,P = map(int,input().split())
 arr = [list(map(int,input().split())) for i in range(P)]
 
-dp = [[2**25]*(P+1) for i in range(D+1)]
-dp[0] = [2**24]*(P+1)
+#dp = [[2**25]*(D+1) for i in range(D+1)]
+dp = [0]*(D+1)
+dp[0] = 1
+#dp[0] = [2**24]*(P+1)
 
-for i in range(1,D+1):
-    for j in range(P):
-            L, C = arr[j]
-            if i-L>=0:
-                dp[i][j] = min(dp[i-L][j-1],C)
-print(*dp,sep='\n')
-print(dp[D][P])
+for i in range(P):
+    L, C = arr[i]
+    for j in range(D,L-1,-1):
+        if dp[j-L]:
+            if j==L:
+                dp[j] = max(dp[j],C)
+            else:
+                dp[j] = max(dp[j],min(dp[j-L],C))
+print(dp[D])
