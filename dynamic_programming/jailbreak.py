@@ -56,3 +56,6 @@ q = 0
 print(search([P]))
 
 print(search2(P,0))
+
+import numpy as np
+print(np.linalg.inv(np.array([[1,2,3],[2,3,2],[3,3,4]]))*7)
