@@ -41,3 +41,4 @@ def solutions():
 T = int(input())
 for test in range(T):
     solutions()
+
