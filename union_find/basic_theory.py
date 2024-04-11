@@ -29,7 +29,6 @@ class OptimizedDisjointSet():
         self.N = size
 
     def find(self,u):
-        self.cnt+=1
         if u==self.parent[u]:
             return u
         return self.find(self.parent[u])
