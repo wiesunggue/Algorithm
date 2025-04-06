@@ -44,3 +44,31 @@ class OptimizedDisjointSet():
         if self.rank[u]==self.rank[v]:
             self.rank[v]+=1
 
+
+
+# 나중에 체크해보자
+# 이기면 배팅금액의 2배 받고, 100원 배팅
+# 지면 배팅금액을 잃고 2배 배팅(돈이 부족하면 남은 돈 만큼 배팅)
+def solution(money, expected, actual):
+    N = len(expected)
+    win = [expected[i]==actual[i] for i in range(N)] # 승패 기록을 저장한 리스트
+    m = 100 # 배팅 금액
+    res = money
+    for i in range(N):
+        # 배팅하기
+        if res < m: # 돈이 부족한 경우
+            m  = res
+            res = 0
+        else: # 돈이 충분한 경우
+            res -= m
+
+        # 결과 보기
+        if win[i]==True:
+            res += m*2 # 2배의 돈을 번다
+            m = 100 # 배팅금액 초기화
+        else:
+            m *= 2 # 배팅 금액 2배 증가
+
+    answer = res
+    return answer
+
