@@ -36,3 +36,4 @@ for c in command:
         dice[0] = arr[x][y]
         arr[x][y] = 0
     print(dice[5])
+#
