@@ -25,6 +25,7 @@ class OptimizedDisjointSet():
 
 N,M = map(int,input().split())
 disjointset = OptimizedDisjointSet(N+1)
+
 for i in range(M):
     a,b = map(int,input().split())
     disjointset.merge(a,b)
