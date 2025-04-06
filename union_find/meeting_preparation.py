@@ -47,4 +47,4 @@ print(len(ans_list))
 print(*ans_list,sep='\n')
 
 #print(*weight,sep='\n')
-#
+##
