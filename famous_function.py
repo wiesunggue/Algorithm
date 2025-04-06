@@ -1,10 +1,10 @@
 # abs() 절댓값 반환
 print(abs(-1),abs(1))
 
-# all() 모든 bool값이 True면 True반환
+# all() 모든 bool값이 True면 True반환 []->True
 print(all([]),all([True, True,1,2,3]),all([True,True,False]))
 
-# any() 어떤 bool값이 True면 True반환
+# any() 어떤 bool값이 True면 True반환 []->False
 print(any([]),any([True,True,False]),any([0,0,0,1]),any([0,0,0,False]))
 
 # bin() 이진수로 변환
@@ -29,7 +29,7 @@ print(list(filter(lambda x: x>50, [10,20,30,40,50,60,70,80,90,100])))
 print(list(map(lambda x:x**2,[1,2,3,4])))
 
 # eval()문자열로 들어온 연산 식 처리하기
-print(eval('1+2'))
+print(eval('1+2'), eval('[1,2]'))
 from functools import reduce
 # reduce(function, iterable)
 print(reduce(lambda x,y:x+y,[1,2,3,4,5,6]))
@@ -38,9 +38,9 @@ print(reduce(lambda x,y:x+y,[1,2,3,4,5,6]))
 # zip() 압축& 압축해제하기
 # 압축하기
 zipped = list(zip([1,2,3],(5,6,7)))
-print(zipped)
+print('zipped',zipped)
 
-# 압축 해제하기
+# 압축 해제하기 -> x만의 좌표나 y만의 좌표나 뽑아낼 수 있음
 A,B = zip(*zipped)
 print(A)
 print(B)
@@ -131,13 +131,13 @@ d[1] += 1
 d[2] += 2
 print(d)
 
-# OrderedDict 순서가 있는 딕셔너리(c++의 map과 같다)
+# OrderedDict 순서가 있는 딕셔너리(삽입된 순서대로 저장)
 from collections import OrderedDict
 od = OrderedDict()
 od[1] = 2
 od[2] = 5
 od[0] = 1
-print(od)
+print('od',od)
 
 # queue 활용하기
 # PriorityQueue().put((우선순위,값)) 으로 사용, 최소 힙
@@ -163,4 +163,5 @@ lst = [1,3,5,6,6,8]
 print(bisect.bisect_left(lst,4))
 print(bisect.bisect_left(lst,6))
 print(bisect.bisect_right(lst,6))
+
 
