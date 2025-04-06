@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 a = 6
 
 # 가장 오른쪽 비트 반환하기
@@ -55,7 +54,7 @@ def f(a,k):
         return
     for i in range(a):
         f(a,k)
-=======
+
 # 이론 연습
 class FenwickTree:
     def __init__(self, N):
@@ -112,4 +111,3 @@ FW.add(4,10000)
 FW.add(5,100000)
 
 print(FW.twoWaySum(0,5))
->>>>>>> origin/main
