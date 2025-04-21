@@ -110,4 +110,4 @@ FW.add(3,1000)
 FW.add(4,10000)
 FW.add(5,100000)
 
-print(FW.twoWaySum(0,5))
+print(FW.twoWaySum(1,5))
