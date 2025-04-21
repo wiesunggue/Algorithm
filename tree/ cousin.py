@@ -5,13 +5,13 @@ N, K = map(int,input().split())
 arr = list(map(int,input().split()))
 tree = [[]for i in range(N)]
 
-idx = 0
-while idx<N:
-    before = idx
-    idx += 1
-    while idx < N and arr[idx]-arr[idx-1] == 1:
-        print(idx)
-        idx += 1
-        tree[before].append(idx)
+nextSerial = 0
+while nextSerial<N:
+    before = nextSerial
+    nextSerial += 1
+    while nextSerial < N and arr[nextSerial]-arr[nextSerial - 1] == 1:
+        print(nextSerial)
+        nextSerial += 1
+        tree[before].append(nextSerial)
 
 print(tree)

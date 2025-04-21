@@ -12,13 +12,13 @@ for i in range(N):
 
 arr.sort()
 count=0
-idx=0
+nextSerial=0
 ans=0
 for i in range(N):
     start,end=arr[i]
     bisect.insort(ordered_end,end)
-    while start>=ordered_end[idx]:
-        idx+=1
+    while start>=ordered_end[nextSerial]:
+        nextSerial+=1
         count-=1
     count+=1
     ans=max(ans,count)

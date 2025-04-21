@@ -3,16 +3,16 @@
 N=int(input())
 arr=[int(input()) for i in range(N)]
 arr.sort()
-idx=0
+nextSerial=0
 for i in range(1,N+1):
     if arr[i-1]<0:
-        idx=i
-if idx!=N and arr[idx]==0:
+        nextSerial=i
+if nextSerial!=N and arr[nextSerial]==0:
     zero_chk=True
 else:
     zero_chk=False
-l_arr=arr[:idx]
-r_arr=arr[idx+zero_chk:]
+l_arr= arr[:nextSerial]
+r_arr= arr[nextSerial + zero_chk:]
 print(l_arr,r_arr)
 cnt=0
 l_start=0

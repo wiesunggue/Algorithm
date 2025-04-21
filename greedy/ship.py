@@ -8,11 +8,11 @@ box=list(map(int,input().split()))
 arr.sort()
 box.sort()
 box_arr=[0 for i in range(N)]
-idx=0
+nextSerial=0
 for i in range(N):
-    while idx<M and arr[i]>=box[idx]:
+    while nextSerial<M and arr[i]>=box[nextSerial]:
         box_arr[i]+=1
-        idx+=1
+        nextSerial+=1
 box_arr.reverse()
 m=0
 

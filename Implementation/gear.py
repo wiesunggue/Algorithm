@@ -68,6 +68,6 @@ gear_list = [deque(list(map(int,input()))) for i in range(4)]
 
 N = int(input())
 for i in range(N):
-    idx,direction = map(int,input().split())
-    update(idx-1,direction)
+    nextSerial,direction = map(int, input().split())
+    update(nextSerial - 1, direction)
 print(score())

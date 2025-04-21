@@ -14,33 +14,33 @@ arr.sort()
 
 # 발판 합치기
 # 시작점 <= 이전의 끝점이라면 합칠 수 있다. => 근데 합치는 것 보다 누적시키는 것이 더 이득이다.(새 배열 형성하는데 많은 시간복잡도)
-idx=arr[0][1]
+nextSerial=arr[0][1]
 before=arr[0][0]
 arr[0][2]=1
-ans=idx
+ans=nextSerial
 sarr = []
 dq = deque()
 for i in range(N):
-    if idx>=arr[i][0]:
-        idx = max(idx,arr[i][1])
+    if nextSerial>=arr[i][0]:
+        nextSerial = max(nextSerial, arr[i][1])
     else:
-        sarr.append([before,idx])
-        idx=arr[i][1]
+        sarr.append([before, nextSerial])
+        nextSerial=arr[i][1]
         before=arr[i][0]
-sarr.append([before,idx])
+sarr.append([before, nextSerial])
 visit = [0]*len(sarr)
 print(sarr)
 sans=0
 dq.append(0)
 while dq:
     print(dq)
-    idx = dq.popleft()
-    if visit[idx]==1:
+    nextSerial = dq.popleft()
+    if visit[nextSerial]==1:
         continue
-    visit[idx]=1
-    jump = sarr[idx][1]-sarr[idx][0]
-    for i in range(idx+1,len(sarr)):
-        if jump>=sarr[i][0]-sarr[idx][1]:
+    visit[nextSerial]=1
+    jump = sarr[nextSerial][1] - sarr[nextSerial][0]
+    for i in range(nextSerial + 1, len(sarr)):
+        if jump>=sarr[i][0]-sarr[nextSerial][1]:
             print('idx',i)
             dq.append(i)
             sans = max(sans,sarr[i][1])
@@ -48,18 +48,18 @@ while dq:
             break
 print(sans)
 print("*"*50)
-idx=arr[0][1]
+nextSerial=arr[0][1]
 before=arr[0][0]
 arr[0][2]=1
-ans=idx
+ans=nextSerial
 for i in range(N):
     print('iteration *',i)
-    if idx>=arr[i][0]:
-        idx = max(idx,arr[i][1])
+    if nextSerial>=arr[i][0]:
+        nextSerial = max(nextSerial, arr[i][1])
         arr[i][2]=1
-        ans = idx
+        ans = nextSerial
     else:
-        jump = idx-before
+        jump = nextSerial - before
         print('jump',jump)
         j=i
         while j<N:
@@ -69,7 +69,7 @@ for i in range(N):
             ans = max(arr[j - 1][1], ans)
             arr[j][2]=1
             j+=1
-        idx=arr[i][1]
+        nextSerial=arr[i][1]
         before=arr[i][0]
     if arr[i][2]==0:
         break

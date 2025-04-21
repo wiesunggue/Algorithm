@@ -23,13 +23,13 @@ m=0
 ans=0
 while m<M:
     print(pq)
-    difficulty,idx = heapq.heappop(pq)
-    if visit[idx]!=0:
+    difficulty,nextSerial = heapq.heappop(pq)
+    if visit[nextSerial]!=0:
         continue
-    visit[idx]=1
+    visit[nextSerial]=1
     m+=1
     ans=max(difficulty,ans)
-    for i,diff in tips[idx]:
+    for i,diff in tips[nextSerial]:
         if visit[i]==0:
             arr[i]-=diff
             heapq.heappush(pq,(arr[i],i))

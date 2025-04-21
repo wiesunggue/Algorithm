@@ -42,8 +42,8 @@ tree = [0]*3*n
 for i in range(int(input())):
     arr=list(map(int,input().split()))
     if arr[0]==1:
-        idx=binary(arr[1])
-        print(idx)
-        update(idx,query(idx,idx+1)-1)
+        nextSerial=binary(arr[1])
+        print(nextSerial)
+        update(nextSerial, query(nextSerial, nextSerial + 1) - 1)
     else:
         update(arr[1],query(arr[1],arr[1]+1)+arr[2])

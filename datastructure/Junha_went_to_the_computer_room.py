@@ -22,15 +22,15 @@ for i in range(1,N):
     # 끝나는 시간이 먼저인 경우 제거 후 삽입한다
     while len(data):
         if data[0][0] < arr[i][0]:
-            _,idx = heapq.heappop(data)
-            heapq.heappush(unalloc,idx)
+            _,nextSerial = heapq.heappop(data)
+            heapq.heappush(unalloc, nextSerial)
         else:
             break
     # 컴퓨터의 빈 공간이 존재할 때 빈 공간을 우선적으로 채운다
     if unalloc:
-        idx=heapq.heappop(unalloc)
-        heapq.heappush(data,(arr[i][1],idx))
-        ans[idx] += 1
+        nextSerial=heapq.heappop(unalloc)
+        heapq.heappush(data, (arr[i][1], nextSerial))
+        ans[nextSerial] += 1
     # 빈 공간이 없다면 새 컴퓨터를 구매한다
     else:
         computer += 1

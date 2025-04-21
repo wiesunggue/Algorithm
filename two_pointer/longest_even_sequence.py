@@ -13,12 +13,12 @@ for i in range(N):
     if int(arr[i][-1])%2==0: temp +=1
     else: count_even.append(temp); temp = 0
 if int(arr[i][-1])%2==0: count_even.append(temp)
-idx = K+1
-range_sum = sum(count_even[:idx])
+nextSerial = K + 1
+range_sum = sum(count_even[:nextSerial])
 ans = range_sum
-while idx<len(count_even):
-    range_sum += count_even[idx]-count_even[idx-K-1]
+while nextSerial<len(count_even):
+    range_sum += count_even[nextSerial] - count_even[nextSerial - K - 1]
     ans = max(ans,range_sum)
-    idx += 1
+    nextSerial += 1
 
 print(ans)

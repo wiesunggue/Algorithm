@@ -17,8 +17,8 @@ for i in range(p):
 
     added = False
     # 플레이어 넣기
-    for idx in range(len(room)):
-        room_id,players = room[idx]
+    for nextSerial in range(len(room)):
+        room_id,players = room[nextSerial]
         if abs(name_info[room_id]-lv)<=10 and len(players) != m:
             players += [id]
             print(players)

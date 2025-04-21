@@ -10,13 +10,13 @@ arr = list(map(int,input().split()))
 Nvisit = sum(arr[:K])
 count = 1
 ans = Nvisit
-idx = K
-while idx<N:
-    Nvisit += arr[idx] - arr[idx-K]
+nextSerial = K
+while nextSerial<N:
+    Nvisit += arr[nextSerial] - arr[nextSerial - K]
     if ans <= Nvisit:
         count = count*(ans==Nvisit)+1
         ans = max(ans, Nvisit)
-    idx +=1
+    nextSerial +=1
 
 if ans==0:
     print("SAD")

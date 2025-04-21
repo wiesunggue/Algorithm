@@ -63,6 +63,8 @@ class FenwickTree:
 
     def oneWaySum(self, pos):
         ans = 0
+        pos += 1
+
         while pos:
             ans += self.tree[pos]
             pos &= pos - 1
@@ -92,6 +94,8 @@ class FenwickTree2:
 
     def onewaySum(self, pos):
         ans = 0
+        pos += 1
+
         while pos:
             ans += self.tree[pos]
             pos &= pos-1

@@ -1,9 +1,9 @@
 N = int(input())
 data = list(map(int,input().split()))
 node = [0]*(len(data)+1)
-idx = 0
+nextSerial = 0
 def recur(n):
-    global idx
+    global nextSerial
     if n>len(data):
         return
     recur(n*2)

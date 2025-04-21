@@ -4,7 +4,7 @@ input = sys.stdin.readline
 
 N,M = map(int,input().split())
 arr = [list(input()) for i in range(N)]
-idx = 0
+nextSerial = 0
 direction = [(-1,0),(1,0),(0,1),(0,-1)]
 
 def moveTo(bead,wall,d,state):
