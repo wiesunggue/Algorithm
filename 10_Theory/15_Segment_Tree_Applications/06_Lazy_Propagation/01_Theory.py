@@ -93,3 +93,153 @@ class RecursivLazySegmentTree:
         '''주어진 구간 중 가장 큰 수를 찾는 함수'''
         return self._query(1,0,self.N-1,l,r)
 
+
+class IterativeLazySegmentTree:
+    """
+    비재귀 Lazy Segment Tree
+
+    지원 연산:
+        update(left, right, value):
+            닫힌 구간 [left, right]의 모든 원소에 value를 더한다.
+
+        query(left, right):
+            닫힌 구간 [left, right]의 최댓값을 반환한다.
+
+    시간 복잡도:
+        생성: O(N)
+        구간 갱신: O(log N)
+        구간 쿼리: O(log N)
+        공간 복잡도: O(N)
+
+    기존 RecursivLazySegmentTree와 같은 인터페이스를 사용한다.
+    재귀 호출과 매번 구간 경계를 전달하는 비용을 없애 Python에서 더 빠르게
+    동작하도록 구현한 형태이다.
+
+    내부 원리:
+        1. 리프를 size번 인덱스부터 연속으로 배치한다.
+        2. 갱신/조회 전에 양쪽 경계 경로의 lazy만 아래로 전달한다.
+        3. 완전히 포함된 내부 구간에는 lazy 값을 남겨 둔다.
+        4. 갱신 후 양쪽 경계에서 루트 방향으로 최댓값을 다시 계산한다.
+
+    tree[node]에는 lazy[node]까지 반영된 구간 최댓값이 저장된다.
+    자식의 최댓값에는 부모의 lazy가 포함되지 않으므로 부모를 다시 계산할
+    때 max(left_child, right_child) + lazy[node]를 사용한다.
+    """
+
+    NEGATIVE_INFINITY = -10**30
+
+    def __init__(self, arr):
+        self.N = len(arr)
+        if self.N == 0:
+            raise ValueError("배열은 하나 이상의 원소를 가져야 합니다.")
+
+        self.size = 1
+        self.height = 0
+
+        while self.size < self.N:
+            self.size <<= 1
+            self.height += 1
+
+        # 리프가 아닌 노드에만 lazy 값이 필요하다.
+        self.tree = [self.NEGATIVE_INFINITY] * (self.size << 1)
+        self.lazy = [0] * self.size
+
+        self.tree[self.size:self.size + self.N] = arr
+
+        for node in range(self.size - 1, 0, -1):
+            self.tree[node] = max(
+                self.tree[node << 1],
+                self.tree[node << 1 | 1],
+            )
+
+    def _apply(self, node, value):
+        """node가 나타내는 구간 전체에 value를 적용한다."""
+        self.tree[node] += value
+
+        if node < self.size:
+            self.lazy[node] += value
+
+    def _push(self, node):
+        """node에 쌓인 lazy 값을 두 자식에게 전달한다."""
+        value = self.lazy[node]
+        if value == 0:
+            return
+
+        self._apply(node << 1, value)
+        self._apply(node << 1 | 1, value)
+        self.lazy[node] = 0
+
+    def _push_path(self, node):
+        """루트부터 node까지 경로의 lazy 값을 위에서부터 전달한다."""
+        for shift in range(self.height, 0, -1):
+            self._push(node >> shift)
+
+    def _pull_path(self, node):
+        """node의 부모부터 루트까지 최댓값을 다시 계산한다."""
+        while node > 1:
+            node >>= 1
+            self.tree[node] = (
+                max(self.tree[node << 1], self.tree[node << 1 | 1])
+                + self.lazy[node]
+            )
+
+    def _validate_range(self, left, right):
+        if not 0 <= left <= right < self.N:
+            raise IndexError(
+                "구간은 0 <= left <= right < N을 만족해야 합니다."
+            )
+
+    def update(self, left, right, value):
+        """닫힌 구간 [left, right]의 모든 원소에 value를 더한다."""
+        self._validate_range(left, right)
+
+        left += self.size
+        right += self.size + 1  # 내부에서는 반열린 구간 [left, right)
+
+        left_leaf = left
+        right_leaf = right - 1
+
+        self._push_path(left_leaf)
+        self._push_path(right_leaf)
+
+        while left < right:
+            if left & 1:
+                self._apply(left, value)
+                left += 1
+
+            if right & 1:
+                right -= 1
+                self._apply(right, value)
+
+            left >>= 1
+            right >>= 1
+
+        self._pull_path(left_leaf)
+        self._pull_path(right_leaf)
+
+    def query(self, left, right):
+        """닫힌 구간 [left, right]의 최댓값을 반환한다."""
+        self._validate_range(left, right)
+
+        left += self.size
+        right += self.size + 1
+
+        self._push_path(left)
+        self._push_path(right - 1)
+
+        result = self.NEGATIVE_INFINITY
+
+        while left < right:
+            if left & 1:
+                result = max(result, self.tree[left])
+                left += 1
+
+            if right & 1:
+                right -= 1
+                result = max(result, self.tree[right])
+
+            left >>= 1
+            right >>= 1
+
+        return result
+
